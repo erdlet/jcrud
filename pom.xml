@@ -10,7 +10,7 @@
   <name>JDBC CRUD Operations</name>
 
   <description>
-    Small library for simple exection of SQL queries in the style of Spring's JDBC Template... but without Spring :)
+    Execute SQL queries in the style of Spring's JDBC Template - but without Spring :)
   </description>
 
   <properties>
