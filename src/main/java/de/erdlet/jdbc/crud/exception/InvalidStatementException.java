@@ -22,28 +22,26 @@
  * SOFTWARE.
  *
  */
-package de.erdlet.jdbc.crud;
+package de.erdlet.jdbc.crud.exception;
 
-import de.erdlet.jdbc.crud.exception.DatabaseException;
 import de.erdlet.jdbc.crud.parameter.ParamSetter;
 
 /**
- * Interface containing all CRUD operations on a database.
+ * Exception which has to be thrown in case the statement doesn't match to the {@link de.erdlet.jdbc.crud.CrudOperations}
+ * selected method. For example, this is the case when an 'UPDATE' statement should be called inside {@link
+ * de.erdlet.jdbc.crud.CrudOperations#insert(String, Object, ParamSetter)}. Technically, this may be the same, but the API of {@link
+ * de.erdlet.jdbc.crud.CrudOperations}
+ * and its usage should be clear and not confusing to the caller.
  *
  * @author Tobias Erdle
  */
-public interface CrudOperations extends ReadOperations {
+public class InvalidStatementException extends RuntimeException {
 
-  /**
-   * Insert an entity into the database.
-   *
-   * @param statement the statement to execute for insertion
-   * @param entity the entity to be inserted
-   * @param paramSetter the {@link ParamSetter} which sets the entity attributes into the {@link java.sql.PreparedStatement}
-   * @param <T> the type of the entity to be saved
-   * @throws DatabaseException in case an {@link java.sql.SQLException} is thrown by the underneath driver
-   * @throws de.erdlet.jdbc.crud.exception.InvalidStatementException in case the statement is no INSERT statement
-   */
-  <T> void insert(final String statement, final T entity, final ParamSetter paramSetter);
+  public InvalidStatementException(final Keywords expectedKeyword, final String statement) {
+    super(String.format("Expected operation '%s' but got '%s'", expectedKeyword.name(), statement));
+  }
 
+  public enum Keywords {
+    INSERT()
+  }
 }

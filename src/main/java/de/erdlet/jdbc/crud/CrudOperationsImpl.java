@@ -25,6 +25,8 @@
 package de.erdlet.jdbc.crud;
 
 import de.erdlet.jdbc.crud.exception.DatabaseException;
+import de.erdlet.jdbc.crud.exception.InvalidStatementException;
+import de.erdlet.jdbc.crud.exception.InvalidStatementException.Keywords;
 import de.erdlet.jdbc.crud.exception.TooManyResultsException;
 import de.erdlet.jdbc.crud.parameter.ParamSetter;
 import de.erdlet.jdbc.crud.results.RowMapper;
@@ -117,6 +119,8 @@ public class CrudOperationsImpl implements CrudOperations {
 
   @Override
   public <T> void insert(final String statement, final T entity, final ParamSetter paramSetter) {
+    checkInsertStatement(statement);
+
     try (final var connection = dataSource.getConnection();
         final var pstmt = connection.prepareStatement(statement)) {
 
@@ -125,6 +129,13 @@ public class CrudOperationsImpl implements CrudOperations {
       pstmt.execute();
     } catch (final SQLException ex) {
       throw new DatabaseException(ex);
+    }
+  }
+
+  private void checkInsertStatement(final String statement) {
+    final String firstKeyword = statement.split(" ")[0];
+    if (!firstKeyword.equalsIgnoreCase(Keywords.INSERT.name())) {
+      throw new InvalidStatementException(Keywords.INSERT, statement);
     }
   }
 

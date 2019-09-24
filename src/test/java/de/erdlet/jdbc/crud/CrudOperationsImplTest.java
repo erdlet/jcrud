@@ -29,6 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import de.erdlet.jdbc.crud.exception.InvalidStatementException;
 import de.erdlet.jdbc.crud.exception.TooManyResultsException;
 import de.erdlet.jdbc.crud.helper.model.Todo;
 import de.erdlet.jdbc.crud.results.RowMapper;
@@ -134,6 +135,18 @@ class CrudOperationsImplTest {
 
     assertEquals(entity, result.get(0));
   }
+
+  @Test
+  void testInsertThrowsExceptionWhenNoInsertStatementIsProvided() {
+    final var entity = new Todo("Neues Todo", "Neuer Todo Body");
+
+    assertThrows(InvalidStatementException.class,
+        () -> systemUnderTest.insert("UPDATE TODOS SET t.title='Foo'", entity, pstmt -> {
+          pstmt.setString(1, entity.getTitle());
+          pstmt.setString(2, entity.getBody());
+        }));
+  }
+
 
   private static void performDatabaseMigration(final DataSource dataSource) throws SQLException {
     try (final var conn = dataSource.getConnection()) {
