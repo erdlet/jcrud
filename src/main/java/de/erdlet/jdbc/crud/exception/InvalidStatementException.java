@@ -35,7 +35,9 @@ import de.erdlet.jdbc.crud.parameter.ParamSetter;
  *
  * @author Tobias Erdle
  */
-public class InvalidStatementException extends RuntimeException {
+public final class InvalidStatementException extends RuntimeException {
+
+  private static final long serialVersionUID = -2475816034340720229L;
 
   public InvalidStatementException(final Keywords expectedKeyword, final String statement) {
     super(String.format("Expected operation '%s' but got '%s'", expectedKeyword.name(), statement));
