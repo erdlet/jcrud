@@ -1,5 +1,5 @@
 # JDBC CRUD Operations 
-[![CircleCI](https://circleci.com/gh/erdlet/jdbc-crud-operations/tree/master.svg?style=svg)](https://circleci.com/gh/erdlet/jdbc-crud-operations/tree/master)
+[![CircleCI](https://circleci.com/gh/erdlet/jdbc-crud-operations.svg?style=svg&circle-token=c30ecba548cdeebf02eb7541feeca5a9ca984be2)](https://circleci.com/gh/erdlet/jdbc-crud-operations)
 
 Execute SQL queries in the style of Spring's JDBC Template - but without Spring :)
 
