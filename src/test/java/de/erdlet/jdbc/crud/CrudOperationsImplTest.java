@@ -26,8 +26,10 @@ package de.erdlet.jdbc.crud;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import de.erdlet.jdbc.crud.exception.TooManyResultsException;
 import de.erdlet.jdbc.crud.helper.model.Todo;
 import de.erdlet.jdbc.crud.results.RowMapper;
 import java.sql.ResultSet;
@@ -88,6 +90,36 @@ class CrudOperationsImplTest {
     final var result = systemUnderTest.select("SELECT * FROM TODOS t WHERE t.title = ?", new TodoRowMapper(), "Unknown name");
 
     assertTrue(result.isEmpty());
+  }
+
+  @Test
+  void testSelectSingleWhenNoResultReturnsExpectEmptyOptional() {
+    final var result = systemUnderTest.selectSingle("SELECT * FROM TODOS t WHERE t.title = ?", new TodoRowMapper(), "Unknown name");
+
+    assertTrue(result.isEmpty());
+  }
+
+  @Test
+  void testSelectSingleWhenSingleResultReturnsExpectFilledOptional() {
+    final var expectedTodo = new Todo("Buy milk", null);
+
+    final var result = systemUnderTest.selectSingle("SELECT * FROM TODOS t WHERE t.title = ?", new TodoRowMapper(), "Buy milk");
+
+    assertEquals(expectedTodo, result.get());
+  }
+
+  @Test
+  void testSelectSingleWhenMultipleResultReturnsExpectTooManyResultsException() {
+    assertThrows(TooManyResultsException.class,
+        () -> systemUnderTest.selectSingle("SELECT * FROM TODOS t", new TodoRowMapper()));
+  }
+
+  @Test
+  void testSelectSingleWhenMultipleResultReturnsExpectExceptionMessageContainsQuery() {
+    final var exception = assertThrows(TooManyResultsException.class,
+        () -> systemUnderTest.selectSingle("SELECT * FROM TODOS t", new TodoRowMapper()));
+
+    assertEquals("Too many results for query 'SELECT * FROM TODOS t' with params '[]'", exception.getMessage());
   }
 
   @Test

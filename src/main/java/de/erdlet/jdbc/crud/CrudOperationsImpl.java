@@ -24,6 +24,8 @@
  */
 package de.erdlet.jdbc.crud;
 
+import de.erdlet.jdbc.crud.exception.DatabaseException;
+import de.erdlet.jdbc.crud.exception.TooManyResultsException;
 import de.erdlet.jdbc.crud.parameter.ParamSetter;
 import de.erdlet.jdbc.crud.results.RowMapper;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -31,6 +33,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import javax.sql.DataSource;
 
 /**
@@ -52,7 +55,7 @@ import javax.sql.DataSource;
  * }
  * }
  * </pre>
- * If you prefer to use Spring instead, you can use a Java config like this for example:
+ * If you prefer to use Spring instead (even if it doesn't make a lot of sense), you can use a Java config like this for example:
  * <pre>
  * {@code
  * @Configuration
@@ -86,6 +89,27 @@ public class CrudOperationsImpl implements CrudOperations {
       applyStatementParams(pstmt, params);
 
       return executeQuery(pstmt, rowMapper);
+    } catch (final SQLException ex) {
+      throw new DatabaseException(ex);
+    }
+  }
+
+  @Override
+  public <T> Optional<T> selectSingle(final String query, final RowMapper<T> rowMapper, final Object... params) {
+    try (final var connection = dataSource.getConnection();
+        final var pstmt = connection.prepareStatement(query)) {
+      applyStatementParams(pstmt, params);
+
+      final var results = executeQuery(pstmt, rowMapper);
+
+      switch (results.size()) {
+        case 0:
+          return Optional.empty();
+        case 1:
+          return Optional.of(results.get(0));
+        default:
+          throw new TooManyResultsException(query, params);
+      }
     } catch (final SQLException ex) {
       throw new DatabaseException(ex);
     }

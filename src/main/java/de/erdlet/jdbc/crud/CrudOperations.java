@@ -24,6 +24,7 @@
  */
 package de.erdlet.jdbc.crud;
 
+import de.erdlet.jdbc.crud.exception.DatabaseException;
 import de.erdlet.jdbc.crud.parameter.ParamSetter;
 
 /**
