@@ -26,6 +26,7 @@ package de.erdlet.jdbc.crud;
 
 import de.erdlet.jdbc.crud.parameter.ParamSetter;
 import de.erdlet.jdbc.crud.results.RowMapper;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -68,6 +69,8 @@ import javax.sql.DataSource;
  *
  * @author Tobias Erdle
  */
+@SuppressFBWarnings(value = {"RCN_REDUNDANT_NULLCHECK_OF_NONNULL_VALUE", "RCN_REDUNDANT_NULLCHECK_WOULD_HAVE_BEEN_A_NPE"},
+    justification = "False positive warnings when using try-with-resource in Java 11")
 public class CrudOperationsImpl implements CrudOperations {
 
   private final DataSource dataSource;

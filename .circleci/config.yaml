@@ -1,0 +1,58 @@
+version: 2
+jobs:
+  build:
+
+    working_directory: ~/workdir
+
+    docker:
+      - image: circleci/openjdk:11-stretch
+
+    steps:
+      - checkout
+      - restore_cache:
+          key: jdbc-crud-operations-{{ checksum "pom.xml" }}
+      - run: ./mvnw clean compile
+      - save_cache:
+          paths:
+            - ~/.m2
+          key: jdbc-crud-operations-{{ checksum "pom.xml" }}
+
+  test:
+    working_directory: ~/workdir
+
+    docker:
+      - image: circleci/openjdk:11-stretch
+
+    steps:
+      - checkout
+      - restore_cache:
+          key: jdbc-crud-operations-{{ checksum "pom.xml" }}
+      - run: ./mvnw clean test
+      - store_test_results:
+          path: target/surefire-reports
+
+  spotbugs:
+    working_directory: ~/workdir
+
+    docker:
+      - image: circleci/openjdk:11-stretch
+
+    steps:
+      - checkout
+      - restore_cache:
+          key: jdbc-crud-operations-{{ checksum "pom.xml" }}
+      - run: ./mvnw clean verify
+      - store_test_results:
+          path: target/spotbugs.xml
+
+workflows:
+  version: 2
+  build_and_test:
+    jobs:
+      - build
+      - test:
+          requires:
+            - build
+      - spotbugs:
+          requires:
+            - test
