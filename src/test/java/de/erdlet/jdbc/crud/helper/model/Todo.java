@@ -22,7 +22,7 @@
  * SOFTWARE.
  *
  */
-package de.erdlet.jdbc.crud.model;
+package de.erdlet.jdbc.crud.helper.model;
 
 import java.util.Objects;
 

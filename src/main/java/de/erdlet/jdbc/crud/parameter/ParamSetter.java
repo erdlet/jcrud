@@ -22,26 +22,18 @@
  * SOFTWARE.
  *
  */
-package de.erdlet.jdbc.crud;
+package de.erdlet.jdbc.crud.parameter;
 
-import de.erdlet.jdbc.crud.parameter.ParamSetter;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 
 /**
- * Interface containing all CRUD operations on a database.
+ * Sets the params of a {@link PreparedStatement}.
  *
  * @author Tobias Erdle
  */
-public interface CrudOperations extends ReadOperations {
+public interface ParamSetter {
 
-  /**
-   * Insert an entity into the database.
-   *
-   * @param statement the statement to execute for insertion
-   * @param entity the entity to be inserted
-   * @param paramSetter the {@link ParamSetter} which sets the entity attributes into the {@link java.sql.PreparedStatement}
-   * @param <T> the type of the entity to be saved
-   * @throws DatabaseException in case an {@link java.sql.SQLException} is thrown by the underneath driver
-   */
-  <T> void insert(final String statement, final T entity, final ParamSetter paramSetter);
+  void setStatementParams(final PreparedStatement pstmt) throws SQLException;
 
 }

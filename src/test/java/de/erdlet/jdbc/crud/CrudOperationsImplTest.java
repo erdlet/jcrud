@@ -28,7 +28,9 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import de.erdlet.jdbc.crud.model.Todo;
+import de.erdlet.jdbc.crud.helper.model.Todo;
+import de.erdlet.jdbc.crud.results.RowMapper;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import javax.sql.DataSource;
 import org.apache.commons.dbcp2.BasicDataSource;
@@ -83,15 +85,27 @@ class CrudOperationsImplTest {
 
   @Test
   void testSelectWithParameterExpectEmptyResultWhenNoResultIsFound() {
-    final var result = systemUnderTest.select("SELECT * FROM TODOS t WHERE t.title = ?",
-        rs -> new Todo(rs.getString("title"), rs.getString("body")), "Get some stuff");
+    final var result = systemUnderTest.select("SELECT * FROM TODOS t WHERE t.title = ?", new TodoRowMapper(), "Unknown name");
 
     assertTrue(result.isEmpty());
   }
 
+  @Test
+  void testInsertExpectResultIsSavedInDatabase() {
+    final var entity = new Todo("Neues Todo", "Neuer Todo Body");
+    systemUnderTest.insert("INSERT INTO TODOS (TITLE, BODY) VALUES (?, ?)", entity, pstmt -> {
+      pstmt.setString(1, entity.getTitle());
+      pstmt.setString(2, entity.getBody());
+    });
+
+    final var result = systemUnderTest.select("SELECT * FROM TODOS t WHERE t.title = ?", new TodoRowMapper(), entity.getTitle());
+
+    assertEquals(entity, result.get(0));
+  }
+
   private static void performDatabaseMigration(final DataSource dataSource) throws SQLException {
     try (final var conn = dataSource.getConnection()) {
-      try(final var statement = conn.prepareStatement("CREATE TABLE TODOS (\n"
+      try (final var statement = conn.prepareStatement("CREATE TABLE TODOS (\n"
           + "    ID INT PRIMARY KEY AUTO_INCREMENT ,\n"
           + "    TITLE VARCHAR NOT NULL ,\n"
           + "    BODY VARCHAR\n"
@@ -107,6 +121,14 @@ class CrudOperationsImplTest {
 
         statement.execute();
       }
+    }
+  }
+
+  private static class TodoRowMapper implements RowMapper<Todo> {
+
+    @Override
+    public Todo map(final ResultSet rs) throws SQLException {
+      return new Todo(rs.getString("title"), rs.getString("body"));
     }
   }
 }

@@ -24,6 +24,7 @@
  */
 package de.erdlet.jdbc.crud;
 
+import de.erdlet.jdbc.crud.parameter.ParamSetter;
 import de.erdlet.jdbc.crud.results.RowMapper;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -82,6 +83,19 @@ public class CrudOperationsImpl implements CrudOperations {
       applyStatementParams(pstmt, params);
 
       return executeQuery(pstmt, rowMapper);
+    } catch (final SQLException ex) {
+      throw new DatabaseException(ex);
+    }
+  }
+
+  @Override
+  public <T> void insert(final String statement, final T entity, final ParamSetter paramSetter) {
+    try (final var connection = dataSource.getConnection();
+        final var pstmt = connection.prepareStatement(statement)) {
+
+      paramSetter.setStatementParams(pstmt);
+
+      pstmt.execute();
     } catch (final SQLException ex) {
       throw new DatabaseException(ex);
     }
