@@ -25,6 +25,7 @@
 package de.erdlet.jdbc.crud;
 
 import java.util.List;
+import Java.util.Optional;
 import de.erdlet.jdbc.crud.results.RowMapper;
 import de.erdlet.jdbc.crud.exception.DatabaseException;
 import de.erdlet.jdbc.crud.parameter.ParamSetter;
