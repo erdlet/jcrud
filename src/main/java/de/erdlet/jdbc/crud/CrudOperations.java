@@ -24,6 +24,8 @@
  */
 package de.erdlet.jdbc.crud;
 
+import java.util.List;
+import java.util.Optional;
 import de.erdlet.jdbc.crud.results.RowMapper;
 import de.erdlet.jdbc.crud.exception.DatabaseException;
 import de.erdlet.jdbc.crud.parameter.ParamSetter;
@@ -33,7 +35,22 @@ import de.erdlet.jdbc.crud.parameter.ParamSetter;
  *
  * @author Tobias Erdle
  */
-public interface CrudOperations extends ReadOperations {
+public interface CrudOperations {
+
+  <T> List<T> select(final String query, final RowMapper<T> rowMapper, final Object... params);
+
+  /**
+   * Select an single entity from the database. It is expected that the query either returns one or no result. In case
+   * the query returns a list of results, it is an exceptional behaviour.
+   *
+   * @param query the query to execute
+   * @param rowMapper the {@link RowMapper} to map the result columns to the entity
+   * @param params the query parameter for resolving the entity
+   * @param <T> the target type of the entity
+   * @return optionally the found entity or an empty result if no entity was found
+   * @throws de.erdlet.jdbc.crud.exception.TooManyResultsException in case there is more than one result
+   */
+  <T> Optional<T> selectSingle(final String query, final RowMapper<T> rowMapper, final Object... params);
 
   /**
    * Insert an entity into the database.
