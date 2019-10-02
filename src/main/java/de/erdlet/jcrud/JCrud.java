@@ -35,7 +35,7 @@ import de.erdlet.jcrud.parameter.ParamSetter;
  *
  * @author Tobias Erdle
  */
-public interface CrudOperations {
+public interface JCrud {
 
   <T> List<T> select(final String query, final RowMapper<T> rowMapper, final Object... params);
 

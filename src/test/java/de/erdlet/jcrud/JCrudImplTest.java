@@ -42,10 +42,10 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-class CrudOperationsImplTest {
+class JCrudImplTest {
 
   private static BasicDataSource dataSource;
-  private CrudOperationsImpl systemUnderTest;
+  private JCrudImpl systemUnderTest;
 
   @BeforeAll
   static void initDatabase() throws Exception {
@@ -60,7 +60,7 @@ class CrudOperationsImplTest {
 
   @BeforeEach
   void setUp() {
-    this.systemUnderTest = new CrudOperationsImpl(dataSource);
+    this.systemUnderTest = new JCrudImpl(dataSource);
   }
 
   @AfterAll
