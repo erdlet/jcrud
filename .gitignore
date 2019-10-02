@@ -3,3 +3,7 @@ target/
 *.iml
 *.iws
 .attach_*
+
+.classpath
+.project
+.settings/
