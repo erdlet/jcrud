@@ -22,21 +22,18 @@
  * SOFTWARE.
  *
  */
-package de.erdlet.jdbc.crud.exception;
-
-import java.util.Arrays;
+package de.erdlet.jcrud.exception;
 
 /**
- * Exception which is thrown in case too many results are returned by a query which
- * is expected to return a lesser amount of entities.
+ * Runtime exception to wrap the checked {@link java.sql.SQLException}.
  *
  * @author Tobias Erdle
  */
-public final class TooManyResultsException extends RuntimeException {
+public final class DatabaseException extends RuntimeException {
 
-  private static final long serialVersionUID = -4481551509533920646L;
+  private static final long serialVersionUID = -5230497776370845839L;
 
-  public TooManyResultsException(final String query, final Object... params) {
-    super(String.format("Too many results for query '%s' with params '%s'", query, Arrays.toString(params)));
+  public DatabaseException(final Throwable cause) {
+    super(cause);
   }
 }

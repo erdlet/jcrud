@@ -22,28 +22,26 @@
  * SOFTWARE.
  *
  */
-package de.erdlet.jdbc.crud.exception;
+package de.erdlet.jcrud.results;
 
-import de.erdlet.jdbc.crud.parameter.ParamSetter;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 /**
- * Exception which has to be thrown in case the statement doesn't match to the {@link de.erdlet.jdbc.crud.CrudOperations}
- * selected method. For example, this is the case when an 'UPDATE' statement should be called inside {@link
- * de.erdlet.jdbc.crud.CrudOperations#insert(String, Object, ParamSetter)}. Technically, this may be the same, but the API of {@link
- * de.erdlet.jdbc.crud.CrudOperations}
- * and its usage should be clear and not confusing to the caller.
+ * Mapper which maps the columns of a {@link ResultSet} row to the expected type.
  *
+ * @param <T> the type of the expected result class
  * @author Tobias Erdle
  */
-public final class InvalidStatementException extends RuntimeException {
+public interface RowMapper<T> {
 
-  private static final long serialVersionUID = -2475816034340720229L;
+  /**
+   * Maps the current {@link ResultSet} row to a new instance of the expected type.
+   *
+   * @param rs the current, not closed {@link ResultSet}
+   * @return an instance of the target type with values from the {@link ResultSet}
+   * @throws SQLException in case problems occur during the {@link ResultSet} processing
+   */
+  T map(final ResultSet rs) throws SQLException;
 
-  public InvalidStatementException(final Keywords expectedKeyword, final String statement) {
-    super(String.format("Expected operation '%s' but got '%s'", expectedKeyword.name(), statement));
-  }
-
-  public enum Keywords {
-    INSERT()
-  }
 }

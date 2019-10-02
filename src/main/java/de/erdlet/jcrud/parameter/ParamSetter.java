@@ -22,7 +22,7 @@
  * SOFTWARE.
  *
  */
-package de.erdlet.jdbc.crud.parameter;
+package de.erdlet.jcrud.parameter;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;

@@ -22,17 +22,17 @@
  * SOFTWARE.
  *
  */
-package de.erdlet.jdbc.crud;
+package de.erdlet.jcrud;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import de.erdlet.jdbc.crud.exception.InvalidStatementException;
-import de.erdlet.jdbc.crud.exception.TooManyResultsException;
-import de.erdlet.jdbc.crud.helper.model.Todo;
-import de.erdlet.jdbc.crud.results.RowMapper;
+import de.erdlet.jcrud.exception.InvalidStatementException;
+import de.erdlet.jcrud.exception.TooManyResultsException;
+import de.erdlet.jcrud.helper.model.Todo;
+import de.erdlet.jcrud.results.RowMapper;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import javax.sql.DataSource;

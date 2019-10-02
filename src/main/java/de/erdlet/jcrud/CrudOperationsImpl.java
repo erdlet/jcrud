@@ -22,14 +22,14 @@
  * SOFTWARE.
  *
  */
-package de.erdlet.jdbc.crud;
+package de.erdlet.jcrud;
 
-import de.erdlet.jdbc.crud.exception.DatabaseException;
-import de.erdlet.jdbc.crud.exception.InvalidStatementException;
-import de.erdlet.jdbc.crud.exception.InvalidStatementException.Keywords;
-import de.erdlet.jdbc.crud.exception.TooManyResultsException;
-import de.erdlet.jdbc.crud.parameter.ParamSetter;
-import de.erdlet.jdbc.crud.results.RowMapper;
+import de.erdlet.jcrud.exception.DatabaseException;
+import de.erdlet.jcrud.exception.InvalidStatementException;
+import de.erdlet.jcrud.exception.InvalidStatementException.Keywords;
+import de.erdlet.jcrud.exception.TooManyResultsException;
+import de.erdlet.jcrud.parameter.ParamSetter;
+import de.erdlet.jcrud.results.RowMapper;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
