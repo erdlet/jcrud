@@ -22,51 +22,21 @@
  * SOFTWARE.
  *
  */
-package de.erdlet.jdbc.crud.helper.model;
+package de.erdlet.jcrud.exception;
 
-import java.util.Objects;
+import java.util.Arrays;
 
-public final class Todo {
+/**
+ * Exception which is thrown in case too many results are returned by a query which
+ * is expected to return a lesser amount of entities.
+ *
+ * @author Tobias Erdle
+ */
+public final class TooManyResultsException extends RuntimeException {
 
-  private final String title;
-  private final String body;
+  private static final long serialVersionUID = -4481551509533920646L;
 
-  public Todo(final String title, final String body) {
-    this.title = title;
-    this.body = body;
-  }
-
-  public String getTitle() {
-    return title;
-  }
-
-  public String getBody() {
-    return body;
-  }
-
-  @Override
-  public boolean equals(final Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
-    }
-    final Todo todo = (Todo) o;
-    return Objects.equals(title, todo.title) &&
-        Objects.equals(body, todo.body);
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(title, body);
-  }
-
-  @Override
-  public String toString() {
-    return "Todo{" +
-        "title='" + title + '\'' +
-        ", body='" + body + '\'' +
-        '}';
+  public TooManyResultsException(final String query, final Object... params) {
+    super(String.format("Too many results for query '%s' with params '%s'", query, Arrays.toString(params)));
   }
 }

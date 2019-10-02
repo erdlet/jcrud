@@ -22,17 +22,17 @@
  * SOFTWARE.
  *
  */
-package de.erdlet.jdbc.crud;
+package de.erdlet.jcrud;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import de.erdlet.jdbc.crud.exception.InvalidStatementException;
-import de.erdlet.jdbc.crud.exception.TooManyResultsException;
-import de.erdlet.jdbc.crud.helper.model.Todo;
-import de.erdlet.jdbc.crud.results.RowMapper;
+import de.erdlet.jcrud.exception.InvalidStatementException;
+import de.erdlet.jcrud.exception.TooManyResultsException;
+import de.erdlet.jcrud.helper.model.Todo;
+import de.erdlet.jcrud.results.RowMapper;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import javax.sql.DataSource;
@@ -42,10 +42,10 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-class CrudOperationsImplTest {
+class JCrudImplTest {
 
   private static BasicDataSource dataSource;
-  private CrudOperationsImpl systemUnderTest;
+  private JCrudImpl systemUnderTest;
 
   @BeforeAll
   static void initDatabase() throws Exception {
@@ -60,7 +60,7 @@ class CrudOperationsImplTest {
 
   @BeforeEach
   void setUp() {
-    this.systemUnderTest = new CrudOperationsImpl(dataSource);
+    this.systemUnderTest = new JCrudImpl(dataSource);
   }
 
   @AfterAll

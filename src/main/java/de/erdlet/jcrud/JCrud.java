@@ -22,20 +22,20 @@
  * SOFTWARE.
  *
  */
-package de.erdlet.jdbc.crud;
+package de.erdlet.jcrud;
 
 import java.util.List;
 import java.util.Optional;
-import de.erdlet.jdbc.crud.results.RowMapper;
-import de.erdlet.jdbc.crud.exception.DatabaseException;
-import de.erdlet.jdbc.crud.parameter.ParamSetter;
+import de.erdlet.jcrud.results.RowMapper;
+import de.erdlet.jcrud.exception.DatabaseException;
+import de.erdlet.jcrud.parameter.ParamSetter;
 
 /**
  * Interface containing all CRUD operations on a database.
  *
  * @author Tobias Erdle
  */
-public interface CrudOperations {
+public interface JCrud {
 
   <T> List<T> select(final String query, final RowMapper<T> rowMapper, final Object... params);
 
@@ -48,7 +48,7 @@ public interface CrudOperations {
    * @param params the query parameter for resolving the entity
    * @param <T> the target type of the entity
    * @return optionally the found entity or an empty result if no entity was found
-   * @throws de.erdlet.jdbc.crud.exception.TooManyResultsException in case there is more than one result
+   * @throws de.erdlet.jcrud.exception.TooManyResultsException in case there is more than one result
    */
   <T> Optional<T> selectSingle(final String query, final RowMapper<T> rowMapper, final Object... params);
 
@@ -60,7 +60,7 @@ public interface CrudOperations {
    * @param paramSetter the {@link ParamSetter} which sets the entity attributes into the {@link java.sql.PreparedStatement}
    * @param <T> the type of the entity to be saved
    * @throws DatabaseException in case an {@link java.sql.SQLException} is thrown by the underneath driver
-   * @throws de.erdlet.jdbc.crud.exception.InvalidStatementException in case the statement is no INSERT statement
+   * @throws de.erdlet.jcrud.exception.InvalidStatementException in case the statement is no INSERT statement
    */
   <T> void insert(final String statement, final T entity, final ParamSetter paramSetter);
 

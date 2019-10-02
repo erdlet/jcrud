@@ -22,14 +22,14 @@
  * SOFTWARE.
  *
  */
-package de.erdlet.jdbc.crud;
+package de.erdlet.jcrud;
 
-import de.erdlet.jdbc.crud.exception.DatabaseException;
-import de.erdlet.jdbc.crud.exception.InvalidStatementException;
-import de.erdlet.jdbc.crud.exception.InvalidStatementException.Keywords;
-import de.erdlet.jdbc.crud.exception.TooManyResultsException;
-import de.erdlet.jdbc.crud.parameter.ParamSetter;
-import de.erdlet.jdbc.crud.results.RowMapper;
+import de.erdlet.jcrud.exception.DatabaseException;
+import de.erdlet.jcrud.exception.InvalidStatementException;
+import de.erdlet.jcrud.exception.InvalidStatementException.Keywords;
+import de.erdlet.jcrud.exception.TooManyResultsException;
+import de.erdlet.jcrud.parameter.ParamSetter;
+import de.erdlet.jcrud.results.RowMapper;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -42,16 +42,16 @@ import javax.sql.DataSource;
  * Core class containing all possible CRUD operations for a {@link DataSource}. This class is designed to be
  * used independent from any technology like CDI or Spring.
  * <p>
- * To use the {@link CrudOperationsImpl}, you can simply create an instance with any datasource. In case you want it to use with CDI,
- * you can create a small producer to configure the {@link CrudOperationsImpl}:
+ * To use the {@link JCrudImpl}, you can simply create an instance with any datasource. In case you want it to use with CDI,
+ * you can create a small producer to configure the {@link JCrudImpl}:
  * <pre>
  * {@code
  * public class CrudOperationsProducer {
  *
  *  @Produces
  *  @ApplicationScoped
- *  public CrudOperations crudOperations(final DataSource datasource) {
- *    return new CrudOperationsImpl(datasource);
+ *  public JCrud jcrud(final DataSource datasource) {
+ *    return new JCrudImpl(datasource);
  *  }
  *
  * }
@@ -61,11 +61,11 @@ import javax.sql.DataSource;
  * <pre>
  * {@code
  * @Configuration
- * public class CrudOperationsConfig {
+ * public class JCrudConfig {
  *
  *  @Bean
- *  public CrudOperations crudOperations(final DataSource datasource) {
- *    return new CrudOperationsImpl(datasource);
+ *  public JCrud jcrud(final DataSource datasource) {
+ *    return new JCrudImpl(datasource);
  *  }
  *
  * }
@@ -76,11 +76,11 @@ import javax.sql.DataSource;
  */
 @SuppressFBWarnings(value = {"RCN_REDUNDANT_NULLCHECK_OF_NONNULL_VALUE", "RCN_REDUNDANT_NULLCHECK_WOULD_HAVE_BEEN_A_NPE"},
     justification = "False positive warnings when using try-with-resource in Java 11")
-public class CrudOperationsImpl implements CrudOperations {
+public class JCrudImpl implements JCrud {
 
   private final DataSource dataSource;
 
-  public CrudOperationsImpl(final DataSource dataSource) {
+  public JCrudImpl(final DataSource dataSource) {
     this.dataSource = dataSource;
   }
 
