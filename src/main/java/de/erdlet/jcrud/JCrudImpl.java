@@ -29,7 +29,7 @@ import java.util.Optional;
 import javax.sql.DataSource;
 import de.erdlet.jcrud.exception.DatabaseException;
 import de.erdlet.jcrud.exception.InvalidStatementException;
-import de.erdlet.jcrud.exception.InvalidStatementException.Keywords;
+import de.erdlet.jcrud.exception.InvalidStatementException.Keyword;
 import de.erdlet.jcrud.exception.TooManyResultsException;
 import de.erdlet.jcrud.parameter.ParamSetter;
 import de.erdlet.jcrud.results.RowMapper;
@@ -155,23 +155,42 @@ public class JCrudImpl implements JCrud {
     }
   }
 
-  private void checkInsertStatement(final String statement) {
-    final String firstKeyword = extractFirstKeyword(statement);
-    if (!firstKeyword.equalsIgnoreCase(Keywords.INSERT.name())) {
-      throw new InvalidStatementException(Keywords.INSERT, statement);
+  @Override
+  public <T> void delete(String statement, T entity, ParamSetter paramSetter) {
+    checkDeleteStatement(statement);
+
+    try (final var connection = dataSource.getConnection();
+        final var pstmt = connection.prepareStatement(statement)) {
+      paramSetter.setStatementParams(pstmt);
+
+      pstmt.executeUpdate();
+    } catch (final SQLException ex) {
+      throw new DatabaseException(ex);
     }
   }
 
-  private void checkUpdateStatement(final String statement) {
-    final var firstKeyword = extractFirstKeyword(statement);
+  private void checkInsertStatement(final String statement) {
+    checkStatementType(statement, Keyword.INSERT);
+  }
 
-    if (!firstKeyword.equalsIgnoreCase(Keywords.UPDATE.name())) {
-      throw new InvalidStatementException(Keywords.UPDATE, statement);
-    }
+  private void checkUpdateStatement(final String statement) {
+    checkStatementType(statement, Keyword.UPDATE);
+  }
+
+  private void checkDeleteStatement(String statement) {
+    checkStatementType(statement, Keyword.DELETE);
   }
 
   private String extractFirstKeyword(final String statement) {
     return statement.split(" ")[0];
+  }
+
+  private void checkStatementType(final String statement, final Keyword keyword) {
+    final var firstKeyword = extractFirstKeyword(statement);
+
+    if (!firstKeyword.equalsIgnoreCase(keyword.name())) {
+      throw new InvalidStatementException(keyword, statement);
+    }
   }
 
   private void applyStatementParams(final PreparedStatement pstmt, final Object[] params)

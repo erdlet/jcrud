@@ -153,11 +153,11 @@ class JCrudImplTest {
   void testUpdateThrowsExceptionWhenNoUpdateStatementIsProvided() {
     final var entity = new Todo("Stored entity", "To be updated!");
 
-    assertThrows(InvalidStatementException.class,
-    () -> systemUnderTest.update("INSERT INTO TODOS (TITLE, BODY) VALUES ('Buy milk', null);", entity, pstmt -> {
-      pstmt.setString(1, entity.getTitle());
-      pstmt.setString(2, entity.getBody());
-    }));
+    assertThrows(InvalidStatementException.class, () -> systemUnderTest
+        .update("INSERT INTO TODOS (TITLE, BODY) VALUES ('Buy milk', null);", entity, pstmt -> {
+          pstmt.setString(1, entity.getTitle());
+          pstmt.setString(2, entity.getBody());
+        }));
   }
 
   @Test
@@ -172,14 +172,45 @@ class JCrudImplTest {
 
     entity.changeTitle(expectedTitle);
 
-    systemUnderTest.update("UPDATE TODOS SET TITLE = ? WHERE TITLE='Title to change'", entity, pstmt -> {
+    systemUnderTest.update("UPDATE TODOS SET TITLE = ? WHERE TITLE='Title to change'", entity,
+        pstmt -> {
+          pstmt.setString(1, entity.getTitle());
+        });
+
+    final var result = systemUnderTest.selectSingle("SELECT * FROM TODOS t WHERE t.title = ?",
+        new TodoRowMapper(), expectedTitle);
+
+    assertEquals(expectedTitle, result.get().getTitle());
+  }
+
+  @Test
+  void testDeleteThrowsExceptionWhenNoDeleteStatementIsProvided() {
+    final var entity = new Todo("Stored entity", "To be Deleted!");
+
+    assertThrows(InvalidStatementException.class, () -> systemUnderTest
+        .update("INSERT INTO TODOS (TITLE, BODY) VALUES ('Buy milk', null);", entity, pstmt -> {
+          pstmt.setString(1, entity.getTitle());
+          pstmt.setString(2, entity.getBody());
+        }));
+  }
+
+  @Test
+  void testDeleteExpectEntityToBeDeletedSuccessfully() {
+    final var entity = new Todo("Title to delete", "To be delete!");
+
+    systemUnderTest.insert("INSERT INTO TODOS (TITLE, BODY) VALUES (?, ?)", entity, pstmt -> {
+      pstmt.setString(1, entity.getTitle());
+      pstmt.setString(2, entity.getBody());
+    });
+
+    systemUnderTest.delete("DELETE FROM TODOS WHERE TITLE=?", entity, pstmt -> {
       pstmt.setString(1, entity.getTitle());
     });
 
     final var result = systemUnderTest.selectSingle("SELECT * FROM TODOS t WHERE t.title = ?",
-    new TodoRowMapper(), expectedTitle);
+        new TodoRowMapper(), "Title to delete");
 
-    assertEquals(expectedTitle, result.get().getTitle());
+    assertTrue(result.isEmpty());
   }
 
   private static void performDatabaseMigration(final DataSource dataSource) throws SQLException {
