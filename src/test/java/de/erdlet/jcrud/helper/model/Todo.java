@@ -28,12 +28,16 @@ import java.util.Objects;
 
 public final class Todo {
 
-  private final String title;
+  private String title;
   private final String body;
 
   public Todo(final String title, final String body) {
     this.title = title;
     this.body = body;
+  }
+
+  public void changeTitle(final String newTitle) {
+    this.title = newTitle;
   }
 
   public String getTitle() {

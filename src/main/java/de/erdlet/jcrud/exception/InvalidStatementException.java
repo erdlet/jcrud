@@ -44,6 +44,7 @@ public final class InvalidStatementException extends RuntimeException {
   }
 
   public enum Keywords {
-    INSERT()
+    INSERT,
+    UPDATE
   }
 }

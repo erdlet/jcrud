@@ -40,28 +40,48 @@ public interface JCrud {
   <T> List<T> select(final String query, final RowMapper<T> rowMapper, final Object... params);
 
   /**
-   * Select an single entity from the database. It is expected that the query either returns one or no result. In case
-   * the query returns a list of results, it is an exceptional behaviour.
+   * Select an single entity from the database. It is expected that the query
+   * either returns one or no result. In case the query returns a list of results,
+   * it is an exceptional behaviour.
    *
-   * @param query the query to execute
-   * @param rowMapper the {@link RowMapper} to map the result columns to the entity
-   * @param params the query parameter for resolving the entity
-   * @param <T> the target type of the entity
+   * @param query     the query to execute
+   * @param rowMapper the {@link RowMapper} to map the result columns to the
+   *                  entity
+   * @param params    the query parameter for resolving the entity
+   * @param <T>       the target type of the entity
    * @return optionally the found entity or an empty result if no entity was found
-   * @throws de.erdlet.jcrud.exception.TooManyResultsException in case there is more than one result
+   * @throws de.erdlet.jcrud.exception.TooManyResultsException in case there is
+   *                                                           more than one
+   *                                                           result
    */
   <T> Optional<T> selectSingle(final String query, final RowMapper<T> rowMapper, final Object... params);
 
   /**
    * Insert an entity into the database.
    *
-   * @param statement the statement to execute for insertion
-   * @param entity the entity to be inserted
-   * @param paramSetter the {@link ParamSetter} which sets the entity attributes into the {@link java.sql.PreparedStatement}
-   * @param <T> the type of the entity to be saved
-   * @throws DatabaseException in case an {@link java.sql.SQLException} is thrown by the underneath driver
-   * @throws de.erdlet.jcrud.exception.InvalidStatementException in case the statement is no INSERT statement
+   * @param statement   the statement to execute for insertion
+   * @param entity      the entity to be inserted
+   * @param paramSetter the {@link ParamSetter} which sets the entity attributes
+   *                    into the {@link java.sql.PreparedStatement}
+   * @param <T>         the type of the entity to be saved
+   * @throws DatabaseException                                   in case an
+   *                                                             {@link java.sql.SQLException}
+   *                                                             is thrown by the
+   *                                                             underneath driver
+   * @throws de.erdlet.jcrud.exception.InvalidStatementException in case the
+   *                                                             statement is no
+   *                                                             INSERT statement
    */
   <T> void insert(final String statement, final T entity, final ParamSetter paramSetter);
 
+  /**
+   * Update an existing entity within the database.
+   * 
+   * @param <T>         the type of the entity to be saved
+   * @param statement   the statement to execute for the update
+   * @param entity      the entity to be inserted
+   * @param paramSetter the {@link ParamSetter} which sets the entity attributes
+   *                    into the {@link java.sql.PreparedStatement}
+   */
+  <T> void update(final String statement, final T entity, final ParamSetter paramSetter);
 }
