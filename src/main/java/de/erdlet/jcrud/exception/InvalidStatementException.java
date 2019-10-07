@@ -39,12 +39,12 @@ public final class InvalidStatementException extends RuntimeException {
 
   private static final long serialVersionUID = -2475816034340720229L;
 
-  public InvalidStatementException(final Keywords expectedKeyword, final String statement) {
+  public InvalidStatementException(final Keyword expectedKeyword, final String statement) {
     super(String.format("Expected operation '%s' but got '%s'", expectedKeyword.name(), statement));
   }
 
-  public enum Keywords {
+  public enum Keyword {
     INSERT,
-    UPDATE
+    UPDATE, DELETE
   }
 }
