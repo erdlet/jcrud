@@ -24,13 +24,13 @@
  */
 package de.erdlet.jcrud.exception;
 
+import de.erdlet.jcrud.JCrud;
 import de.erdlet.jcrud.parameter.ParamSetter;
 
 /**
- * Exception which has to be thrown in case the statement doesn't match to the {@link de.erdlet.jcrud.CrudOperations}
+ * Exception which has to be thrown in case the statement doesn't match to the {@link JCrud}
  * selected method. For example, this is the case when an 'UPDATE' statement should be called inside {@link
- * de.erdlet.jcrud.CrudOperations#insert(String, Object, ParamSetter)}. Technically, this may be the same, but the API of {@link
- * de.erdlet.jcrud.CrudOperations}
+ * JCrud#insert(String, Object, ParamSetter)}. Technically, this may be the same, but the API of {@link JCrud}
  * and its usage should be clear and not confusing to the caller.
  *
  * @author Tobias Erdle
