@@ -23,6 +23,7 @@ package de.erdlet.jcrud;
 
 import java.util.List;
 import java.util.Optional;
+
 import de.erdlet.jcrud.exception.DatabaseException;
 import de.erdlet.jcrud.parameter.ParamSetter;
 import de.erdlet.jcrud.results.RowMapper;
@@ -64,7 +65,7 @@ public interface JCrud {
    * @throws de.erdlet.jcrud.exception.InvalidStatementException in case the statement is no INSERT
    *                                                             statement
    */
-  <T> void insert(final String statement, final T entity, final ParamSetter paramSetter);
+  <T> void insert(final String statement, final T entity, final ParamSetter<T> paramSetter);
 
   /**
    * Update an existing entity within the database.
@@ -75,7 +76,7 @@ public interface JCrud {
    * @param paramSetter the {@link ParamSetter} which sets the entity attributes into the
    *                    {@link java.sql.PreparedStatement}
    */
-  <T> void update(final String statement, final T entity, final ParamSetter paramSetter);
+  <T> void update(final String statement, final T entity, final ParamSetter<T> paramSetter);
 
   /**
    * Delete an existing entity from the database.
@@ -86,5 +87,5 @@ public interface JCrud {
    * @param paramSetter the {@link ParamSetter} which sets the entity's attributes into the
    *                    {@link java.sql.PreparedStatement}
    */
-  <T> void delete(final String statement, final T entity, final ParamSetter paramSetter);
+  <T> void delete(final String statement, final T entity, final ParamSetter<T> paramSetter);
 }

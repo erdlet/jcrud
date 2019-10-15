@@ -26,7 +26,9 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
 import javax.sql.DataSource;
+
 import de.erdlet.jcrud.exception.DatabaseException;
 import de.erdlet.jcrud.exception.InvalidStatementException;
 import de.erdlet.jcrud.exception.InvalidStatementException.Keyword;
@@ -125,13 +127,13 @@ public class JCrudImpl implements JCrud {
   }
 
   @Override
-  public <T> void insert(final String statement, final T entity, final ParamSetter paramSetter) {
+  public <T> void insert(final String statement, final T entity, final ParamSetter<T> paramSetter) {
     checkInsertStatement(statement);
 
     try (final var connection = dataSource.getConnection();
         final var pstmt = connection.prepareStatement(statement)) {
 
-      paramSetter.setStatementParams(pstmt);
+      paramSetter.setStatementParams(entity, pstmt);
 
       pstmt.executeUpdate();
     } catch (final SQLException ex) {
@@ -140,13 +142,13 @@ public class JCrudImpl implements JCrud {
   }
 
   @Override
-  public <T> void update(final String statement, final T entity, final ParamSetter paramSetter) {
+  public <T> void update(final String statement, final T entity, final ParamSetter<T> paramSetter) {
     checkUpdateStatement(statement);
 
     try (final var connection = dataSource.getConnection();
         final var pstmt = connection.prepareStatement(statement)) {
 
-      paramSetter.setStatementParams(pstmt);
+      paramSetter.setStatementParams(entity, pstmt);
 
       pstmt.executeUpdate();
 
@@ -156,12 +158,12 @@ public class JCrudImpl implements JCrud {
   }
 
   @Override
-  public <T> void delete(String statement, T entity, ParamSetter paramSetter) {
+  public <T> void delete(String statement, T entity, ParamSetter<T> paramSetter) {
     checkDeleteStatement(statement);
 
     try (final var connection = dataSource.getConnection();
         final var pstmt = connection.prepareStatement(statement)) {
-      paramSetter.setStatementParams(pstmt);
+      paramSetter.setStatementParams(entity, pstmt);
 
       pstmt.executeUpdate();
     } catch (final SQLException ex) {

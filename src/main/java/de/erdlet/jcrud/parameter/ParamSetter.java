@@ -32,8 +32,8 @@ import java.sql.SQLException;
  *
  * @author Tobias Erdle
  */
-public interface ParamSetter {
+public interface ParamSetter<T> {
 
-  void setStatementParams(final PreparedStatement pstmt) throws SQLException;
+  void setStatementParams(final T entity, final PreparedStatement pstmt) throws SQLException;
 
 }

@@ -25,14 +25,18 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
+
 import javax.sql.DataSource;
+
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
 import de.erdlet.jcrud.exception.InvalidStatementException;
 import de.erdlet.jcrud.exception.TooManyResultsException;
 import de.erdlet.jcrud.helper.model.Todo;
@@ -127,7 +131,7 @@ class JCrudImplTest {
   @Test
   void testInsertExpectResultIsSavedInDatabase() {
     final var entity = new Todo("Neues Todo", "Neuer Todo Body");
-    systemUnderTest.insert("INSERT INTO TODOS (TITLE, BODY) VALUES (?, ?)", entity, pstmt -> {
+    systemUnderTest.insert("INSERT INTO TODOS (TITLE, BODY) VALUES (?, ?)", entity, (ent, pstmt) -> {
       pstmt.setString(1, entity.getTitle());
       pstmt.setString(2, entity.getBody());
     });
@@ -143,9 +147,9 @@ class JCrudImplTest {
     final var entity = new Todo("Neues Todo", "Neuer Todo Body");
 
     assertThrows(InvalidStatementException.class,
-        () -> systemUnderTest.insert("UPDATE TODOS SET t.title='Foo'", entity, pstmt -> {
-          pstmt.setString(1, entity.getTitle());
-          pstmt.setString(2, entity.getBody());
+        () -> systemUnderTest.insert("UPDATE TODOS SET t.title='Foo'", entity, (ent, pstmt) -> {
+          pstmt.setString(1, ent.getTitle());
+          pstmt.setString(2, ent.getBody());
         }));
   }
 
@@ -154,9 +158,9 @@ class JCrudImplTest {
     final var entity = new Todo("Stored entity", "To be updated!");
 
     assertThrows(InvalidStatementException.class, () -> systemUnderTest
-        .update("INSERT INTO TODOS (TITLE, BODY) VALUES ('Buy milk', null);", entity, pstmt -> {
-          pstmt.setString(1, entity.getTitle());
-          pstmt.setString(2, entity.getBody());
+        .update("INSERT INTO TODOS (TITLE, BODY) VALUES ('Buy milk', null);", entity, (ent, pstmt) -> {
+          pstmt.setString(1, ent.getTitle());
+          pstmt.setString(2, ent.getBody());
         }));
   }
 
@@ -165,16 +169,16 @@ class JCrudImplTest {
     final var expectedTitle = "Changed title";
     final var entity = new Todo("Title to change", "To be updated!");
 
-    systemUnderTest.insert("INSERT INTO TODOS (TITLE, BODY) VALUES (?, ?)", entity, pstmt -> {
-      pstmt.setString(1, entity.getTitle());
-      pstmt.setString(2, entity.getBody());
+    systemUnderTest.insert("INSERT INTO TODOS (TITLE, BODY) VALUES (?, ?)", entity, (ent, pstmt) -> {
+      pstmt.setString(1, ent.getTitle());
+      pstmt.setString(2, ent.getBody());
     });
 
     entity.changeTitle(expectedTitle);
 
     systemUnderTest.update("UPDATE TODOS SET TITLE = ? WHERE TITLE='Title to change'", entity,
-        pstmt -> {
-          pstmt.setString(1, entity.getTitle());
+        (ent, pstmt) -> {
+          pstmt.setString(1, ent.getTitle());
         });
 
     final var result = systemUnderTest.selectSingle("SELECT * FROM TODOS t WHERE t.title = ?",
@@ -188,9 +192,9 @@ class JCrudImplTest {
     final var entity = new Todo("Stored entity", "To be Deleted!");
 
     assertThrows(InvalidStatementException.class, () -> systemUnderTest
-        .update("INSERT INTO TODOS (TITLE, BODY) VALUES ('Buy milk', null);", entity, pstmt -> {
-          pstmt.setString(1, entity.getTitle());
-          pstmt.setString(2, entity.getBody());
+        .update("INSERT INTO TODOS (TITLE, BODY) VALUES ('Buy milk', null);", entity, (ent, pstmt) -> {
+          pstmt.setString(1, ent.getTitle());
+          pstmt.setString(2, ent.getBody());
         }));
   }
 
@@ -198,13 +202,13 @@ class JCrudImplTest {
   void testDeleteExpectEntityToBeDeletedSuccessfully() {
     final var entity = new Todo("Title to delete", "To be delete!");
 
-    systemUnderTest.insert("INSERT INTO TODOS (TITLE, BODY) VALUES (?, ?)", entity, pstmt -> {
-      pstmt.setString(1, entity.getTitle());
-      pstmt.setString(2, entity.getBody());
+    systemUnderTest.insert("INSERT INTO TODOS (TITLE, BODY) VALUES (?, ?)", entity, (ent, pstmt) -> {
+      pstmt.setString(1, ent.getTitle());
+      pstmt.setString(2, ent.getBody());
     });
 
-    systemUnderTest.delete("DELETE FROM TODOS WHERE TITLE=?", entity, pstmt -> {
-      pstmt.setString(1, entity.getTitle());
+    systemUnderTest.delete("DELETE FROM TODOS WHERE TITLE=?", entity, (ent, pstmt) -> {
+      pstmt.setString(1, ent.getTitle());
     });
 
     final var result = systemUnderTest.selectSingle("SELECT * FROM TODOS t WHERE t.title = ?",
