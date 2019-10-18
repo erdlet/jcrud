@@ -29,7 +29,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>de.erdlet.jcrud</groupId>
   <artifactId>jcrud</artifactId>
-  <version>0.1</version>
+  <version>0.1-SNAPSHOT</version>
   <packaging>jar</packaging>
   <name>JDBC CRUD Operations</name>
 
@@ -178,25 +178,17 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-source-plugin</artifactId>
-        <version>3.0.1</version>
+        <version>3.1.0</version>
+        <configuration>
+          <encoding>UTF-8</encoding>
+        </configuration>
         <executions>
-          <execution>
+        <execution>
             <id>attach-sources</id>
             <goals>
               <goal>jar</goal>
             </goals>
           </execution>
-        </executions>
-      </plugin>
-
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-source-plugin</artifactId>
-        <version>2.10.4</version>
-        <configuration>
-          <encoding>UTF-8</encoding>
-        </configuration>
-        <executions>
           <execution>
             <id>attach-javadoc</id>
             <goals>
