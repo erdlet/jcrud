@@ -28,7 +28,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>de.erdlet.jcrud</groupId>
   <artifactId>jcrud</artifactId>
-  <version>0.1-SNAPSHOT</version>
+  <version>0.1</version>
   <packaging>jar</packaging>
   <name>JDBC CRUD Operations</name>
 
