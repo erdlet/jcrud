@@ -35,7 +35,7 @@
   <description>
     Execute SQL queries in the style of Spring's JDBC Template - but without Spring :)
   </description>
-  <url>https://github.com/mvc-toolbox/mvc-toolbox</url>
+  <url>https://github.com/erdlet/jcrud</url>
 
   <licenses>
     <license>
@@ -219,9 +219,8 @@
   </build>
 
   <profiles>
-    <!-- GPG Signature on release -->
     <profile>
-      <id>release-sign-artifacts</id>
+      <id>sign-artifacts-on-release</id>
       <activation>
         <property>
           <name>performRelease</name>
