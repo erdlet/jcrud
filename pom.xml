@@ -35,6 +35,14 @@
   <description>
     Execute SQL queries in the style of Spring's JDBC Template - but without Spring :)
   </description>
+  <url>https://github.com/mvc-toolbox/mvc-toolbox</url>
+
+  <licenses>
+    <license>
+      <name>MIT</name>
+      <url>https://mit-license.org/</url>
+    </license>
+  </licenses>
 
   <developers>
     <developer>
@@ -194,6 +202,18 @@
             </goals>
           </execution>
         </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.sonatype.plugins</groupId>
+        <artifactId>nexus-staging-maven-plugin</artifactId>
+        <version>1.6.7</version>
+        <extensions>true</extensions>
+        <configuration>
+          <serverId>ossrh</serverId>
+          <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+          <autoReleaseAfterClose>true</autoReleaseAfterClose>
+        </configuration>
       </plugin>
     </plugins>
   </build>
