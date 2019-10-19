@@ -1,5 +1,5 @@
 # jCRUD Operations 
-[![CircleCI](https://circleci.com/gh/erdlet/jcrud.svg?style=svg&circle-token=c30ecba548cdeebf02eb7541feeca5a9ca984be2)](https://circleci.com/gh/erdlet/jcrud)
+[![CircleCI](https://circleci.com/gh/erdlet/jcrud.svg?style=svg&circle-token=c30ecba548cdeebf02eb7541feeca5a9ca984be2)](https://circleci.com/gh/erdlet/jcrud) [![MIT License](http://img.shields.io/badge/license-MIT-green.svg) ](https://github.com/erdlet/jcrud/blob/master/LICENSE)
 
 Execute SQL queries in the style of Spring's JDBC Template - but without Spring :)
 
