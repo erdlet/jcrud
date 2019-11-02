@@ -9,3 +9,7 @@ abstraction of the base JDBC API. But for projects which are not using Spring, a
 `spring-jdbc` artifact causes the addition of nearly the complete Spring core to the project.
 
 To avoid this problem, `jCRUD`shall be a dependency-less, small and easy to use alternative to Spring's great `JdbcTemplate`.
+
+## Used Java versions
+- 0.3: Java 11
+- 0.4: Java 11
