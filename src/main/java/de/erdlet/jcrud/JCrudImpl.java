@@ -141,6 +141,25 @@ public class JCrudImpl implements JCrud {
     }
 
     @Override
+    public <T> void insert(final String statement, final List<T> entities, final ParamSetter<T> paramSetter) {
+        checkInsertStatement(statement);
+
+        try (final var connection = dataSource.getConnection();
+            final var pstmt = connection.prepareStatement(statement)) {
+
+            for (final var entity : entities) {
+                paramSetter.setStatementParams(entity, pstmt);
+
+                pstmt.addBatch();
+            }
+
+            pstmt.executeBatch();
+        } catch (final SQLException ex) {
+            throw new DatabaseException(ex);
+        }
+    }
+
+    @Override
     public <T> void update(final String statement, final T entity, final ParamSetter<T> paramSetter) {
         checkUpdateStatement(statement);
 

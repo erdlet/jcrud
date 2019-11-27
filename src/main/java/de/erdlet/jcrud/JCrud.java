@@ -76,6 +76,16 @@ public interface JCrud {
     <T> void insert(final String statement, final T entity, final ParamSetter<T> paramSetter);
 
     /**
+     * Insert multiple entities in the database by a batch.
+     *
+     * @param statement the insert statement which will be executed
+     * @param entities a {@link List} of entities which shall be persisted
+     * @param paramSetter the {@link ParamSetter} for the statement
+     * @param <T> the type of the entity to persist
+     */
+    <T> void insert(final String statement, final List<T> entities, final ParamSetter<T> paramSetter);
+
+    /**
      * Update an existing entity within the database.
      *
      * @param <T> the type of the entity to be saved

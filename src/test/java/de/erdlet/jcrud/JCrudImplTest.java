@@ -29,9 +29,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import de.erdlet.jcrud.exception.InvalidStatementException;
 import de.erdlet.jcrud.exception.TooManyResultsException;
 import de.erdlet.jcrud.helper.model.Todo;
+import de.erdlet.jcrud.parameter.ParamSetter;
 import de.erdlet.jcrud.results.RowMapper;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Collections;
 import java.util.List;
 import javax.sql.DataSource;
 import org.apache.commons.dbcp2.BasicDataSource;
@@ -148,10 +151,7 @@ class JCrudImplTest {
     @Test
     void testInsertExpectResultIsSavedInDatabase() {
         final var entity = new Todo("Neues Todo", "Neuer Todo Body");
-        systemUnderTest.insert("INSERT INTO TODOS (TITLE, BODY) VALUES (?, ?)", entity, (ent, pstmt) -> {
-            pstmt.setString(1, entity.getTitle());
-            pstmt.setString(2, entity.getBody());
-        });
+        systemUnderTest.insert("INSERT INTO TODOS (TITLE, BODY) VALUES (?, ?)", entity, new TodoParamSetter());
 
         final var result = systemUnderTest.select("SELECT * FROM TODOS t WHERE t.title = ?",
             new TodoRowMapper(), entity.getTitle());
@@ -164,10 +164,45 @@ class JCrudImplTest {
         final var entity = new Todo("Neues Todo", "Neuer Todo Body");
 
         assertThrows(InvalidStatementException.class,
-            () -> systemUnderTest.insert("UPDATE TODOS SET t.title='Foo'", entity, (ent, pstmt) -> {
-                pstmt.setString(1, ent.getTitle());
-                pstmt.setString(2, ent.getBody());
+            () -> systemUnderTest.insert("UPDATE TODOS SET t.title='Foo'", entity, new TodoParamSetter()));
+    }
+
+    @Test
+    void testInsertWithMultipleEntitiesThrowsExceptionWhenStatementIsNotInsert() {
+        assertThrows(InvalidStatementException.class,
+            () -> systemUnderTest.insert("SELECT * FROM FOOBAR", List.of(new Todo("Foo", "Bar")), (ParamSetter<Todo>) (entity, pstmt) -> {
             }));
+    }
+
+    @Test
+    void testInsertWithMulitpleEntitiesSavesSingleEntityWhenOnlyOneIsProvided() {
+        final var entity = new Todo("My todo", "");
+
+        systemUnderTest.insert("INSERT INTO TODOS (TITLE, BODY) VALUES (?, ?)", Collections.singletonList(entity),
+            new TodoParamSetter());
+
+        final var result = systemUnderTest.selectSingle("SELECT * FROM TODOS t WHERE t.title = ?",
+            new TodoRowMapper(), entity.getTitle());
+
+        assertTrue(result.isPresent());
+    }
+
+    @Test
+    void testInsertWithMultipleEntitiesSavesMultipleValues() {
+        final var entity1 = new Todo("First todo", "");
+        final var entity2 = new Todo("Second todo", "");
+        final var entity3 = new Todo("Third todo", "");
+
+        systemUnderTest.insert("INSERT INTO TODOS (TITLE, BODY) VALUES (?, ?)", List.of(entity1, entity2, entity3),
+            new TodoParamSetter());
+
+        final var results = systemUnderTest.select("SELECT * FROM TODOS", new TodoRowMapper());
+
+        assertAll(
+            () -> assertEquals(entity1, results.get(0)),
+            () -> assertEquals(entity2, results.get(1)),
+            () -> assertEquals(entity3, results.get(2))
+        );
     }
 
     @Test
@@ -175,10 +210,7 @@ class JCrudImplTest {
         final var entity = new Todo("Stored entity", "To be updated!");
 
         assertThrows(InvalidStatementException.class, () -> systemUnderTest
-            .update("INSERT INTO TODOS (TITLE, BODY) VALUES ('Buy milk', null);", entity, (ent, pstmt) -> {
-                pstmt.setString(1, ent.getTitle());
-                pstmt.setString(2, ent.getBody());
-            }));
+            .update("INSERT INTO TODOS (TITLE, BODY) VALUES ('Buy milk', null);", entity, new TodoParamSetter()));
     }
 
     @Test
@@ -206,10 +238,7 @@ class JCrudImplTest {
         final var entity = new Todo("Stored entity", "To be Deleted!");
 
         assertThrows(InvalidStatementException.class, () -> systemUnderTest
-            .update("INSERT INTO TODOS (TITLE, BODY) VALUES ('Buy milk', null);", entity, (ent, pstmt) -> {
-                pstmt.setString(1, ent.getTitle());
-                pstmt.setString(2, ent.getBody());
-            }));
+            .update("INSERT INTO TODOS (TITLE, BODY) VALUES ('Buy milk', null);", entity, new TodoParamSetter()));
     }
 
     @Test
@@ -293,6 +322,15 @@ class JCrudImplTest {
         @Override
         public Todo map(final ResultSet rs) throws SQLException {
             return new Todo(rs.getString("title"), rs.getString("body"));
+        }
+    }
+
+    private static class TodoParamSetter implements ParamSetter<Todo> {
+
+        @Override
+        public void setStatementParams(final Todo entity, final PreparedStatement pstmt) throws SQLException {
+            pstmt.setString(1, entity.getTitle());
+            pstmt.setString(2, entity.getBody());
         }
     }
 }
