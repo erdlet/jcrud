@@ -40,11 +40,23 @@ public final class InvalidStatementException extends RuntimeException {
   private static final long serialVersionUID = -2475816034340720229L;
 
   public InvalidStatementException(final Keyword expectedKeyword, final String statement) {
-    super(String.format("Expected operation '%s' but got '%s'", expectedKeyword.name(), statement));
+    super(String.format("Expected statement to start with '%s' but was '%s'", expectedKeyword.statementFragment, statement));
   }
 
   public enum Keyword {
-    INSERT,
-    UPDATE, DELETE
+    INSERT("insert"),
+    UPDATE("update"),
+    DELETE("delete"),
+    COUNT("select count");
+
+    final String statementFragment;
+
+    Keyword(final String statementFragment) {
+      this.statementFragment = statementFragment;
+    }
+
+    public String asStatementFragment() {
+      return statementFragment;
+    }
   }
 }

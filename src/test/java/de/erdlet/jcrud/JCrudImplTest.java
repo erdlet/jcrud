@@ -26,217 +26,273 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
-import javax.sql.DataSource;
-
-import org.apache.commons.dbcp2.BasicDataSource;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
 import de.erdlet.jcrud.exception.InvalidStatementException;
 import de.erdlet.jcrud.exception.TooManyResultsException;
 import de.erdlet.jcrud.helper.model.Todo;
 import de.erdlet.jcrud.results.RowMapper;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.List;
+import javax.sql.DataSource;
+import org.apache.commons.dbcp2.BasicDataSource;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 class JCrudImplTest {
 
-  private static BasicDataSource dataSource;
-  private JCrudImpl systemUnderTest;
+    private static BasicDataSource dataSource;
+    private JCrudImpl systemUnderTest;
 
-  @BeforeAll
-  static void initDatabase() throws Exception {
-    final var ds = new BasicDataSource();
-    ds.setUrl("jdbc:h2:mem:test");
-    ds.setUsername("sa");
+    @BeforeAll
+    static void initDatabase() throws Exception {
+        final var ds = new BasicDataSource();
+        ds.setUrl("jdbc:h2:mem:test");
+        ds.setUsername("sa");
 
-    performDatabaseMigration(ds);
+        performDatabaseMigration(ds);
 
-    dataSource = ds;
-  }
+        dataSource = ds;
+    }
 
-  @BeforeEach
-  void setUp() {
-    this.systemUnderTest = new JCrudImpl(dataSource);
-  }
+    @BeforeEach
+    void setUp() {
+        this.systemUnderTest = new JCrudImpl(dataSource);
+    }
 
-  @AfterAll
-  static void closeDb() throws Exception {
-    dataSource.close();
-  }
+    @AfterEach
+    void truncateTablesAfterTest() throws Exception {
+        truncateTables(dataSource);
+    }
 
-  @Test
-  void testSelectExpectEmptyCollectionWhenNoResultIsFound() {
-    final var result = systemUnderTest.select("SELECT * FROM EMPTY_TABLE", rs -> null);
+    @AfterAll
+    static void closeDb() throws Exception {
+        dataSource.close();
+    }
 
-    assertTrue(result.isEmpty());
-  }
+    @Test
+    void testSelectExpectEmptyCollectionWhenNoResultIsFound() {
+        final var result = systemUnderTest.select("SELECT * FROM EMPTY_TABLE", rs -> null);
 
-  @Test
-  void testSelectExpectCorrectResultsWhenResultSetIsNotEmpty() {
-    final var result = systemUnderTest.select("SELECT * FROM TODOS",
-        rs -> new Todo(rs.getString("title"), rs.getString("body")));
+        assertTrue(result.isEmpty());
+    }
 
-    assertAll(
-        () -> assertEquals(new Todo("My first todo", "An example todo for JDBC Mapper"),
-            result.get(0)),
-        () -> assertEquals(new Todo("Get stuff from bakery", "bread"), result.get(1)),
-        () -> assertEquals(new Todo("Buy milk", null), result.get(2)));
-  }
+    @Test
+    void testSelectExpectCorrectResultsWhenResultSetIsNotEmpty() {
+        final var todo1 = new Todo("My first todo", "An example todo for JDBC Mapper");
+        final var todo2 = new Todo("Get stuff from bakery", "bread");
+        final var todo3 = new Todo("Buy milk", null);
 
-  @Test
-  void testSelectWithParameterExpectEmptyResultWhenNoResultIsFound() {
-    final var result = systemUnderTest.select("SELECT * FROM TODOS t WHERE t.title = ?",
-        new TodoRowMapper(), "Unknown name");
+        List.of(todo1, todo2, todo3).forEach(JCrudImplTest::insertTodo);
 
-    assertTrue(result.isEmpty());
-  }
+        final var result = systemUnderTest.select("SELECT * FROM TODOS",
+            rs -> new Todo(rs.getString("title"), rs.getString("body")));
 
-  @Test
-  void testSelectSingleWhenNoResultReturnsExpectEmptyOptional() {
-    final var result = systemUnderTest.selectSingle("SELECT * FROM TODOS t WHERE t.title = ?",
-        new TodoRowMapper(), "Unknown name");
+        assertAll(
+            () -> assertEquals(todo1, result.get(0)),
+            () -> assertEquals(todo2, result.get(1)),
+            () -> assertEquals(todo3, result.get(2)));
+    }
 
-    assertTrue(result.isEmpty());
-  }
+    @Test
+    void testSelectWithParameterExpectEmptyResultWhenNoResultIsFound() {
+        final var result = systemUnderTest.select("SELECT * FROM TODOS t WHERE t.title = ?",
+            new TodoRowMapper(), "Unknown name");
 
-  @Test
-  void testSelectSingleWhenSingleResultReturnsExpectFilledOptional() {
-    final var expectedTodo = new Todo("Buy milk", null);
+        assertTrue(result.isEmpty());
+    }
 
-    final var result = systemUnderTest.selectSingle("SELECT * FROM TODOS t WHERE t.title = ?",
-        new TodoRowMapper(), "Buy milk");
+    @Test
+    void testSelectSingleWhenNoResultReturnsExpectEmptyOptional() {
+        final var result = systemUnderTest.selectSingle("SELECT * FROM TODOS t WHERE t.title = ?",
+            new TodoRowMapper(), "Unknown name");
 
-    assertEquals(expectedTodo, result.get());
-  }
+        assertTrue(result.isEmpty());
+    }
 
-  @Test
-  void testSelectSingleWhenMultipleResultReturnsExpectTooManyResultsException() {
-    assertThrows(TooManyResultsException.class,
-        () -> systemUnderTest.selectSingle("SELECT * FROM TODOS t", new TodoRowMapper()));
-  }
+    @Test
+    void testSelectSingleWhenSingleResultReturnsExpectFilledOptional() {
+        final var expectedTodo = new Todo("Buy milk", null);
 
-  @Test
-  void testSelectSingleWhenMultipleResultReturnsExpectExceptionMessageContainsQuery() {
-    final var exception = assertThrows(TooManyResultsException.class,
-        () -> systemUnderTest.selectSingle("SELECT * FROM TODOS t", new TodoRowMapper()));
+        insertTodo(expectedTodo);
 
-    assertEquals("Too many results for query 'SELECT * FROM TODOS t' with params '[]'",
-        exception.getMessage());
-  }
+        final var result = systemUnderTest.selectSingle("SELECT * FROM TODOS t WHERE t.title = ?",
+            new TodoRowMapper(), "Buy milk");
 
-  @Test
-  void testInsertExpectResultIsSavedInDatabase() {
-    final var entity = new Todo("Neues Todo", "Neuer Todo Body");
-    systemUnderTest.insert("INSERT INTO TODOS (TITLE, BODY) VALUES (?, ?)", entity, (ent, pstmt) -> {
-      pstmt.setString(1, entity.getTitle());
-      pstmt.setString(2, entity.getBody());
-    });
+        assertEquals(expectedTodo, result.get());
+    }
 
-    final var result = systemUnderTest.select("SELECT * FROM TODOS t WHERE t.title = ?",
-        new TodoRowMapper(), entity.getTitle());
+    @Test
+    void testSelectSingleWhenMultipleResultReturnsExpectTooManyResultsException() {
+        insertTodo(new Todo("First todo", "Do something"));
+        insertTodo(new Todo("Second todo", "Do something other"));
 
-    assertEquals(entity, result.get(0));
-  }
+        assertThrows(TooManyResultsException.class,
+            () -> systemUnderTest.selectSingle("SELECT * FROM TODOS t", new TodoRowMapper()));
+    }
 
-  @Test
-  void testInsertThrowsExceptionWhenNoInsertStatementIsProvided() {
-    final var entity = new Todo("Neues Todo", "Neuer Todo Body");
+    @Test
+    void testSelectSingleWhenMultipleResultReturnsExpectExceptionMessageContainsQuery() {
+        insertTodo(new Todo("First todo", "Do something"));
+        insertTodo(new Todo("Second todo", "Do something other"));
 
-    assertThrows(InvalidStatementException.class,
-        () -> systemUnderTest.insert("UPDATE TODOS SET t.title='Foo'", entity, (ent, pstmt) -> {
-          pstmt.setString(1, ent.getTitle());
-          pstmt.setString(2, ent.getBody());
-        }));
-  }
+        final var exception = assertThrows(TooManyResultsException.class,
+            () -> systemUnderTest.selectSingle("SELECT * FROM TODOS t", new TodoRowMapper()));
 
-  @Test
-  void testUpdateThrowsExceptionWhenNoUpdateStatementIsProvided() {
-    final var entity = new Todo("Stored entity", "To be updated!");
+        assertEquals("Too many results for query 'SELECT * FROM TODOS t' with params '[]'",
+            exception.getMessage());
+    }
 
-    assertThrows(InvalidStatementException.class, () -> systemUnderTest
-        .update("INSERT INTO TODOS (TITLE, BODY) VALUES ('Buy milk', null);", entity, (ent, pstmt) -> {
-          pstmt.setString(1, ent.getTitle());
-          pstmt.setString(2, ent.getBody());
-        }));
-  }
-
-  @Test
-  void testUpdateExpectEntityToBeUpdatedSuccessfully() {
-    final var expectedTitle = "Changed title";
-    final var entity = new Todo("Title to change", "To be updated!");
-
-    systemUnderTest.insert("INSERT INTO TODOS (TITLE, BODY) VALUES (?, ?)", entity, (ent, pstmt) -> {
-      pstmt.setString(1, ent.getTitle());
-      pstmt.setString(2, ent.getBody());
-    });
-
-    entity.changeTitle(expectedTitle);
-
-    systemUnderTest.update("UPDATE TODOS SET TITLE = ? WHERE TITLE='Title to change'", entity,
-        (ent, pstmt) -> {
-          pstmt.setString(1, ent.getTitle());
+    @Test
+    void testInsertExpectResultIsSavedInDatabase() {
+        final var entity = new Todo("Neues Todo", "Neuer Todo Body");
+        systemUnderTest.insert("INSERT INTO TODOS (TITLE, BODY) VALUES (?, ?)", entity, (ent, pstmt) -> {
+            pstmt.setString(1, entity.getTitle());
+            pstmt.setString(2, entity.getBody());
         });
 
-    final var result = systemUnderTest.selectSingle("SELECT * FROM TODOS t WHERE t.title = ?",
-        new TodoRowMapper(), expectedTitle);
+        final var result = systemUnderTest.select("SELECT * FROM TODOS t WHERE t.title = ?",
+            new TodoRowMapper(), entity.getTitle());
 
-    assertEquals(expectedTitle, result.get().getTitle());
-  }
-
-  @Test
-  void testDeleteThrowsExceptionWhenNoDeleteStatementIsProvided() {
-    final var entity = new Todo("Stored entity", "To be Deleted!");
-
-    assertThrows(InvalidStatementException.class, () -> systemUnderTest
-        .update("INSERT INTO TODOS (TITLE, BODY) VALUES ('Buy milk', null);", entity, (ent, pstmt) -> {
-          pstmt.setString(1, ent.getTitle());
-          pstmt.setString(2, ent.getBody());
-        }));
-  }
-
-  @Test
-  void testDeleteExpectEntityToBeDeletedSuccessfully() {
-    final var entity = new Todo("Title to delete", "To be delete!");
-
-    systemUnderTest.insert("INSERT INTO TODOS (TITLE, BODY) VALUES (?, ?)", entity, (ent, pstmt) -> {
-      pstmt.setString(1, ent.getTitle());
-      pstmt.setString(2, ent.getBody());
-    });
-
-    systemUnderTest.delete("DELETE FROM TODOS WHERE TITLE=?", entity, (ent, pstmt) -> {
-      pstmt.setString(1, ent.getTitle());
-    });
-
-    final var result = systemUnderTest.selectSingle("SELECT * FROM TODOS t WHERE t.title = ?",
-        new TodoRowMapper(), "Title to delete");
-
-    assertTrue(result.isEmpty());
-  }
-
-  private static void performDatabaseMigration(final DataSource dataSource) throws SQLException {
-    try (final var conn = dataSource.getConnection()) {
-      try (final var statement = conn.prepareStatement("CREATE TABLE TODOS (\n"
-          + "    ID INT PRIMARY KEY AUTO_INCREMENT ,\n" + "    TITLE VARCHAR NOT NULL ,\n"
-          + "    BODY VARCHAR\n" + ");\n" + "\n" + "CREATE TABLE EMPTY_TABLE (\n"
-          + "    ID INT PRIMARY KEY AUTO_INCREMENT\n" + ");\n" + "\n"
-          + "INSERT INTO TODOS (TITLE, BODY) VALUES ('My first todo', 'An example todo for JDBC Mapper');\n"
-          + "INSERT INTO TODOS (TITLE, BODY) VALUES ('Get stuff from bakery', 'bread');\n"
-          + "INSERT INTO TODOS (TITLE, BODY) VALUES ('Buy milk', null);")) {
-
-        statement.execute();
-      }
+        assertEquals(entity, result.get(0));
     }
-  }
 
-  private static class TodoRowMapper implements RowMapper<Todo> {
+    @Test
+    void testInsertThrowsExceptionWhenNoInsertStatementIsProvided() {
+        final var entity = new Todo("Neues Todo", "Neuer Todo Body");
 
-    @Override
-    public Todo map(final ResultSet rs) throws SQLException {
-      return new Todo(rs.getString("title"), rs.getString("body"));
+        assertThrows(InvalidStatementException.class,
+            () -> systemUnderTest.insert("UPDATE TODOS SET t.title='Foo'", entity, (ent, pstmt) -> {
+                pstmt.setString(1, ent.getTitle());
+                pstmt.setString(2, ent.getBody());
+            }));
     }
-  }
+
+    @Test
+    void testUpdateThrowsExceptionWhenNoUpdateStatementIsProvided() {
+        final var entity = new Todo("Stored entity", "To be updated!");
+
+        assertThrows(InvalidStatementException.class, () -> systemUnderTest
+            .update("INSERT INTO TODOS (TITLE, BODY) VALUES ('Buy milk', null);", entity, (ent, pstmt) -> {
+                pstmt.setString(1, ent.getTitle());
+                pstmt.setString(2, ent.getBody());
+            }));
+    }
+
+    @Test
+    void testUpdateExpectEntityToBeUpdatedSuccessfully() {
+        final var expectedTitle = "Changed title";
+        final var entity = new Todo("Title to change", "To be updated!");
+
+        insertTodo(entity);
+
+        entity.changeTitle(expectedTitle);
+
+        systemUnderTest.update("UPDATE TODOS SET TITLE = ? WHERE TITLE='Title to change'", entity,
+            (ent, pstmt) -> {
+                pstmt.setString(1, ent.getTitle());
+            });
+
+        final var result = systemUnderTest.selectSingle("SELECT * FROM TODOS t WHERE t.title = ?",
+            new TodoRowMapper(), expectedTitle);
+
+        assertEquals(expectedTitle, result.get().getTitle());
+    }
+
+    @Test
+    void testDeleteThrowsExceptionWhenNoDeleteStatementIsProvided() {
+        final var entity = new Todo("Stored entity", "To be Deleted!");
+
+        assertThrows(InvalidStatementException.class, () -> systemUnderTest
+            .update("INSERT INTO TODOS (TITLE, BODY) VALUES ('Buy milk', null);", entity, (ent, pstmt) -> {
+                pstmt.setString(1, ent.getTitle());
+                pstmt.setString(2, ent.getBody());
+            }));
+    }
+
+    @Test
+    void testDeleteExpectEntityToBeDeletedSuccessfully() {
+        final var entity = new Todo("Title to delete", "To be delete!");
+
+        insertTodo(entity);
+
+        systemUnderTest.delete("DELETE FROM TODOS WHERE TITLE=?", entity, (ent, pstmt) -> {
+            pstmt.setString(1, ent.getTitle());
+        });
+
+        final var result = systemUnderTest.selectSingle("SELECT * FROM TODOS t WHERE t.title = ?",
+            new TodoRowMapper(), "Title to delete");
+
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void testCountExpectExpectionWhenStatementIsNoCountStatement() {
+        assertThrows(InvalidStatementException.class, () -> systemUnderTest.count("SELECT * FROM foobar"));
+    }
+
+    @Test
+    void testCountExpectZeroWhenNoResultsAreFound() {
+        final var count = systemUnderTest.count("SELECT COUNT(id) FROM EMPTY_TABLE");
+
+        assertEquals(0, count);
+    }
+
+    @Test
+    void testCountExpectCorrectAmountWhenResultsAreFound() {
+        insertTodo(new Todo("First todo", ""));
+        insertTodo(new Todo("Second todo", ""));
+
+        final var count = systemUnderTest.count("SELECT COUNT(id) FROM TODOS");
+
+        assertEquals(2, count);
+    }
+
+    private static void insertTodo(final Todo todo) {
+        try (final var conn = dataSource.getConnection();
+            final var pstmt = conn.prepareStatement("INSERT INTO TODOS (TITLE, BODY) VALUES (?, ?)")) {
+            conn.setAutoCommit(true);
+
+            pstmt.setString(1, todo.getTitle());
+            pstmt.setString(2, todo.getBody());
+
+            pstmt.execute();
+        } catch (final SQLException ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+
+    private static void performDatabaseMigration(final DataSource dataSource) throws SQLException {
+        try (final var conn = dataSource.getConnection()) {
+            try (final var statement = conn.prepareStatement("CREATE TABLE TODOS (\n"
+                + "    ID INT PRIMARY KEY AUTO_INCREMENT ,\n" + "    TITLE VARCHAR NOT NULL ,\n"
+                + "    BODY VARCHAR\n" + ");\n" + "\n" + "CREATE TABLE EMPTY_TABLE (\n"
+                + "    ID INT PRIMARY KEY AUTO_INCREMENT\n" + ");")) {
+
+                conn.setAutoCommit(true);
+
+                statement.execute();
+            }
+        }
+    }
+
+    private static void truncateTables(final DataSource dataSource) throws SQLException {
+        try (final var conn = dataSource.getConnection();
+            final var statement = conn.prepareStatement("TRUNCATE TABLE TODOS")) {
+
+            conn.setAutoCommit(true);
+
+            statement.execute();
+        }
+    }
+
+    private static class TodoRowMapper implements RowMapper<Todo> {
+
+        @Override
+        public Todo map(final ResultSet rs) throws SQLException {
+            return new Todo(rs.getString("title"), rs.getString("body"));
+        }
+    }
 }
