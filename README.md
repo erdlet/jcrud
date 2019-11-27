@@ -11,5 +11,8 @@ abstraction of the base JDBC API. But for projects which are not using Spring, a
 To avoid this problem, `jCRUD`shall be a dependency-less, small and easy to use alternative to Spring's great `JdbcTemplate`.
 
 ## Used Java versions
-- 0.3: Java 11
+- 1.0.0: Java 11
+
+### Beta Version
 - 0.4: Java 11
+- 0.3: Java 11
