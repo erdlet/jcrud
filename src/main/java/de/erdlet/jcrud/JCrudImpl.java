@@ -21,14 +21,6 @@
  */
 package de.erdlet.jcrud;
 
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
-import javax.sql.DataSource;
-
 import de.erdlet.jcrud.exception.DatabaseException;
 import de.erdlet.jcrud.exception.InvalidStatementException;
 import de.erdlet.jcrud.exception.InvalidStatementException.Keyword;
@@ -36,6 +28,12 @@ import de.erdlet.jcrud.exception.TooManyResultsException;
 import de.erdlet.jcrud.parameter.ParamSetter;
 import de.erdlet.jcrud.results.RowMapper;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import javax.sql.DataSource;
 
 /**
  * Core class containing all possible CRUD operations for a {@link DataSource}. This class is
@@ -43,7 +41,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
  * <p>
  * To use the {@link JCrudImpl}, you can simply create an instance with any datasource. In case you
  * want it to use with CDI, you can create a small producer to configure the {@link JCrudImpl}:
- * 
+ *
  * <pre>
  * {
  *   &#64;code
@@ -58,10 +56,10 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
  *   }
  * }
  * </pre>
- * 
+ *
  * If you prefer to use Spring instead (even if it doesn't make a lot of sense), you can use a Java
  * config like this for example:
- * 
+ *
  * <pre>
  * {
  *   &#64;code
@@ -85,133 +83,149 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
     justification = "False positive warnings when using try-with-resource in Java 11")
 public class JCrudImpl implements JCrud {
 
-  private final DataSource dataSource;
+    private final DataSource dataSource;
 
-  public JCrudImpl(final DataSource dataSource) {
-    this.dataSource = dataSource;
-  }
-
-  @Override
-  public <T> List<T> select(final String query, final RowMapper<T> rowMapper,
-      final Object... params) {
-    try (final var connection = dataSource.getConnection();
-        final var pstmt = connection.prepareStatement(query)) {
-      applyStatementParams(pstmt, params);
-
-      return executeQuery(pstmt, rowMapper);
-    } catch (final SQLException ex) {
-      throw new DatabaseException(ex);
+    public JCrudImpl(final DataSource dataSource) {
+        this.dataSource = dataSource;
     }
-  }
 
-  @Override
-  public <T> Optional<T> selectSingle(final String query, final RowMapper<T> rowMapper,
-      final Object... params) {
-    try (final var connection = dataSource.getConnection();
-        final var pstmt = connection.prepareStatement(query)) {
-      applyStatementParams(pstmt, params);
+    @Override
+    public <T> List<T> select(final String query, final RowMapper<T> rowMapper,
+        final Object... params) {
+        try (final var connection = dataSource.getConnection();
+            final var pstmt = connection.prepareStatement(query)) {
+            applyStatementParams(pstmt, params);
 
-      final var results = executeQuery(pstmt, rowMapper);
-
-      switch (results.size()) {
-        case 0:
-          return Optional.empty();
-        case 1:
-          return Optional.of(results.get(0));
-        default:
-          throw new TooManyResultsException(query, params);
-      }
-    } catch (final SQLException ex) {
-      throw new DatabaseException(ex);
+            return executeQuery(pstmt, rowMapper);
+        } catch (final SQLException ex) {
+            throw new DatabaseException(ex);
+        }
     }
-  }
 
-  @Override
-  public <T> void insert(final String statement, final T entity, final ParamSetter<T> paramSetter) {
-    checkInsertStatement(statement);
+    @Override
+    public <T> Optional<T> selectSingle(final String query, final RowMapper<T> rowMapper,
+        final Object... params) {
+        try (final var connection = dataSource.getConnection();
+            final var pstmt = connection.prepareStatement(query)) {
+            applyStatementParams(pstmt, params);
 
-    try (final var connection = dataSource.getConnection();
-        final var pstmt = connection.prepareStatement(statement)) {
+            final var results = executeQuery(pstmt, rowMapper);
 
-      paramSetter.setStatementParams(entity, pstmt);
-
-      pstmt.executeUpdate();
-    } catch (final SQLException ex) {
-      throw new DatabaseException(ex);
+            switch (results.size()) {
+                case 0:
+                    return Optional.empty();
+                case 1:
+                    return Optional.of(results.get(0));
+                default:
+                    throw new TooManyResultsException(query, params);
+            }
+        } catch (final SQLException ex) {
+            throw new DatabaseException(ex);
+        }
     }
-  }
 
-  @Override
-  public <T> void update(final String statement, final T entity, final ParamSetter<T> paramSetter) {
-    checkUpdateStatement(statement);
+    @Override
+    public <T> void insert(final String statement, final T entity, final ParamSetter<T> paramSetter) {
+        checkInsertStatement(statement);
 
-    try (final var connection = dataSource.getConnection();
-        final var pstmt = connection.prepareStatement(statement)) {
+        try (final var connection = dataSource.getConnection();
+            final var pstmt = connection.prepareStatement(statement)) {
 
-      paramSetter.setStatementParams(entity, pstmt);
+            paramSetter.setStatementParams(entity, pstmt);
 
-      pstmt.executeUpdate();
-
-    } catch (final SQLException ex) {
-      throw new DatabaseException(ex);
+            pstmt.executeUpdate();
+        } catch (final SQLException ex) {
+            throw new DatabaseException(ex);
+        }
     }
-  }
 
-  @Override
-  public <T> void delete(String statement, T entity, ParamSetter<T> paramSetter) {
-    checkDeleteStatement(statement);
+    @Override
+    public <T> void update(final String statement, final T entity, final ParamSetter<T> paramSetter) {
+        checkUpdateStatement(statement);
 
-    try (final var connection = dataSource.getConnection();
-        final var pstmt = connection.prepareStatement(statement)) {
-      paramSetter.setStatementParams(entity, pstmt);
+        try (final var connection = dataSource.getConnection();
+            final var pstmt = connection.prepareStatement(statement)) {
 
-      pstmt.executeUpdate();
-    } catch (final SQLException ex) {
-      throw new DatabaseException(ex);
+            paramSetter.setStatementParams(entity, pstmt);
+
+            pstmt.executeUpdate();
+
+        } catch (final SQLException ex) {
+            throw new DatabaseException(ex);
+        }
     }
-  }
 
-  private void checkInsertStatement(final String statement) {
-    checkStatementType(statement, Keyword.INSERT);
-  }
+    @Override
+    public <T> void delete(final String statement, final T entity, final ParamSetter<T> paramSetter) {
+        checkDeleteStatement(statement);
 
-  private void checkUpdateStatement(final String statement) {
-    checkStatementType(statement, Keyword.UPDATE);
-  }
+        try (final var connection = dataSource.getConnection();
+            final var pstmt = connection.prepareStatement(statement)) {
 
-  private void checkDeleteStatement(String statement) {
-    checkStatementType(statement, Keyword.DELETE);
-  }
+            paramSetter.setStatementParams(entity, pstmt);
 
-  private String extractFirstKeyword(final String statement) {
-    return statement.split(" ")[0];
-  }
-
-  private void checkStatementType(final String statement, final Keyword keyword) {
-    final var firstKeyword = extractFirstKeyword(statement);
-
-    if (!firstKeyword.equalsIgnoreCase(keyword.name())) {
-      throw new InvalidStatementException(keyword, statement);
+            pstmt.executeUpdate();
+        } catch (final SQLException ex) {
+            throw new DatabaseException(ex);
+        }
     }
-  }
 
-  private void applyStatementParams(final PreparedStatement pstmt, final Object[] params)
-      throws SQLException {
-    for (int i = 1; i <= params.length; i++) {
-      pstmt.setObject(i, params[i - 1]);
+    @Override
+    public long count(final String query, final Object... params) {
+        checkCountStatement(query);
+
+        try (final var connection = dataSource.getConnection();
+            final var pstmt = connection.prepareStatement(query)) {
+
+            applyStatementParams(pstmt, params);
+
+            try (final var rs = pstmt.executeQuery()) {
+                return rs.next() ? rs.getLong(1) : 0;
+            }
+        } catch (final SQLException ex) {
+            throw new DatabaseException(ex);
+        }
     }
-  }
 
-  private <T> List<T> executeQuery(final PreparedStatement pstmt, final RowMapper<T> rowMapper)
-      throws SQLException {
-    try (final var rs = pstmt.executeQuery()) {
-
-      final var result = new ArrayList<T>();
-      while (rs.next()) {
-        result.add(rowMapper.map(rs));
-      }
-
-      return result;
+    private void checkInsertStatement(final String statement) {
+        checkStatementType(statement, Keyword.INSERT);
     }
-  }
+
+    private void checkUpdateStatement(final String statement) {
+        checkStatementType(statement, Keyword.UPDATE);
+    }
+
+    private void checkDeleteStatement(final String statement) {
+        checkStatementType(statement, Keyword.DELETE);
+    }
+
+    private void checkCountStatement(final String statement) {
+      checkStatementType(statement, Keyword.COUNT);
+    }
+
+    private void checkStatementType(final String statement, final Keyword keyword) {
+        if (!statement.toLowerCase().startsWith(keyword.asStatementFragment())) {
+            throw new InvalidStatementException(keyword, statement);
+        }
+    }
+
+    private void applyStatementParams(final PreparedStatement pstmt, final Object[] params)
+        throws SQLException {
+        for (int i = 1; i <= params.length; i++) {
+            pstmt.setObject(i, params[i - 1]);
+        }
+    }
+
+    private <T> List<T> executeQuery(final PreparedStatement pstmt, final RowMapper<T> rowMapper)
+        throws SQLException {
+        try (final var rs = pstmt.executeQuery()) {
+
+            final var result = new ArrayList<T>();
+            while (rs.next()) {
+                result.add(rowMapper.map(rs));
+            }
+
+            return result;
+        }
+    }
 }
