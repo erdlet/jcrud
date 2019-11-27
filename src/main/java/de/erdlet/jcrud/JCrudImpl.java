@@ -32,6 +32,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import javax.sql.DataSource;
 
@@ -200,11 +201,12 @@ public class JCrudImpl implements JCrud {
     }
 
     private void checkCountStatement(final String statement) {
-      checkStatementType(statement, Keyword.COUNT);
+        checkStatementType(statement, Keyword.COUNT);
     }
 
     private void checkStatementType(final String statement, final Keyword keyword) {
-        if (!statement.toLowerCase().startsWith(keyword.asStatementFragment())) {
+        // As SQL keywords are english everytime, we can set the ENGLISH locale by default
+        if (!statement.toLowerCase(Locale.ENGLISH).startsWith(keyword.asStatementFragment())) {
             throw new InvalidStatementException(keyword, statement);
         }
     }
