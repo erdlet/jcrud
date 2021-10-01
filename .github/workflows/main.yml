@@ -30,10 +30,6 @@ jobs:
 
       - name: Run Unit tests
         run: ./mvnw -B clean test
-          echo Add other actions to build,
-          echo test, and deploy your project.
       
       - name: Run integration tests
         run: ./mvnw -B clean verify
-          echo Add other actions to build,
-          echo test, and deploy your project.
