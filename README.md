@@ -1,5 +1,5 @@
 # jCRUD 
-[![MIT License](http://img.shields.io/badge/license-MIT-green.svg) ](https://github.com/erdlet/jcrud/blob/master/LICENSE)[![Maven Central](https://img.shields.io/maven-central/v/de.erdlet.jcrud/jcrud.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22de.erdlet.jcrud%22%20AND%20a:%22jcrud%22) 
+[![CI](https://github.com/erdlet/jcrud/actions/workflows/main.yml/badge.svg?branch=master)](https://github.com/erdlet/jcrud/actions/workflows/main.yml) [![MIT License](http://img.shields.io/badge/license-MIT-green.svg) ](https://github.com/erdlet/jcrud/blob/master/LICENSE)[![Maven Central](https://img.shields.io/maven-central/v/de.erdlet.jcrud/jcrud.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22de.erdlet.jcrud%22%20AND%20a:%22jcrud%22) 
 
 Execute SQL queries in the style of Spring's JDBC Template - but without Spring :)
 
